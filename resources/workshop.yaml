@@ -1,25 +1,36 @@
 apiVersion: training.eduk8s.io/v1alpha2
 kind: Workshop
 metadata:
-  name: lab-markdown-sample
+  name: lab-kpack-testing
 spec:
-  title: Markdown Sample
-  description: A sample workshop using Markdown
-  vendor: eduk8s.io
-  difficulty: beginner
-  duration: 15m
-  url: https://github.com/eduk8s/lab-markdown-sample
+  title: Kpack Testing
+  description: Play area for testing kpack
   content:
-    #image: quay.io/eduk8s/lab-markdown-sample:master
-    files: github.com/eduk8s/lab-markdown-sample
+    files: github.com/eduk8s-tests/lab-kpack-testing
   session:
-    namespaces:
-      budget: small
-    applications:
-      terminal:
-        enabled: true
-        layout: split
-      console:
-        enabled: true
-      editor:
-        enabled: true
+    objects:
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: kontinue-access
+        rules:
+          - apiGroups:
+              - experimental.kontinue.io
+              - kpack.io
+              - serving.knative.dev
+              - source.toolkit.fluxcd.io
+              - opinions.local
+            resources: ['*']
+            verbs: ['*']
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: kontinue-access
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: Role
+          name: kontinue-access
+        subjects:
+          - kind: ServiceAccount
+            namespace: $(workshop_namespace)
+            name: $(service_account)
